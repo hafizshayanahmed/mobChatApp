@@ -86,6 +86,30 @@ function getAllUsers() {
     })
 }
 
+function getStory() {
+    let mystr = []
+    return new Promise((resolve, reject) => {
+        db.collection("story").get().then((e) => {
+            e.forEach((elem) => {
+                mystr.push(elem.data())
+            })
+            resolve(mystr)
+        })
+    })
+}
+
+function addStory(e) {
+    let currentUser = firebase.auth().currentUser;
+    return new Promise((resolve, reject) => {
+        db.collection("story").doc(currentUser.uid).set({ story: e, createdAt: Date.now(), uid: currentUser.uid, username: currentUser.displayName }).then(() => {
+            resolve({ message: "Story added" })
+        })
+            .catch((e) => {
+                reject(e)
+            })
+    })
+}
+
 function createRoom(friendId) {
     const userId = firebase.auth().currentUser.uid
     let chatExists = false;
@@ -115,6 +139,13 @@ function createRoom(friendId) {
     })
 }
 
+function getMyUid() {
+    let currentUser = firebase.auth().currentUser
+    return new Promise((resolve, reject) => {
+        resolve(currentUser)
+    })
+}
+
 function sendMessageToDb(message, roomId) {
     const obj = {
         message,
@@ -131,5 +162,8 @@ export {
     getAllUsers,
     createRoom,
     sendMessageToDb,
-    logIn
+    logIn,
+    getStory,
+    addStory,
+    getMyUid,
 }

@@ -1,18 +1,39 @@
 import React from 'react';
 import { StyleSheet, Text, View, FlatList, Image, ScrollView, TouchableOpacity, Button } from 'react-native';
-import { getAllUsers, createRoom } from "../config/firebase";
+import { getAllUsers, createRoom, getStory, addStory, getMyUid } from "../config/firebase";
+import * as ImagePicker from 'expo-image-picker';
 
 class App extends React.Component {
     constructor() {
         super();
         this.state = {
             arr: [{ key: 'Shayan' }, { key: 'Ahmed' }, { key: 'Shah' }, { key: 'Zeeshan' }],
-            con: false
+            storyArr: [],
+            con: false,
+            storyCon: false,
         }
     }
 
     componentDidMount() {
         this.getusers()
+        this.getAllStory()
+        this.getUid()
+
+    }
+
+    async getUid() {
+        const uid = await getMyUid()
+        this.setState({
+            uid: uid.uid
+        })
+    }
+
+    async getAllStory() {
+        const allStr = await getStory()
+        this.setState({
+            storyArr: allStr,
+            storyCon: true
+        })
     }
 
     async getusers() {
@@ -26,12 +47,37 @@ class App extends React.Component {
     async startChat(e) {
         try {
             let chatRoom = await createRoom(e)
-            console.log(chatRoom._id)
             this.props.navigation.navigate("Msg", chatRoom._id)
         } catch (e) {
             alert(e)
         }
     }
+
+    async addMyStory() {
+        try {
+            await this.pickImage()
+        } catch (e) {
+            alert(e)
+        }
+    }
+
+    async pickImage() {
+        let result = await ImagePicker.launchImageLibraryAsync({
+            mediaTypes: ImagePicker.MediaTypeOptions.All,
+            allowsEditing: true,
+            aspect: [4, 3],
+        });
+        if (!result.cancelled) {
+            this.setState({ image: result.uri });
+            try {
+                let resp = await addStory(result.uri)
+                alert(resp.message)
+                this.getAllStory()
+            } catch (e) {
+                alert(e.message)
+            }
+        }
+    };
 
     render() {
         return (
@@ -41,12 +87,53 @@ class App extends React.Component {
                         Stories
         </Text>
                     <View style={styles.container}>
-                        {this.state.arr.map((e) => {
-                            return <View style={{ flex: 1, flexDirection: 'row' }}>
+                    {this.state.storyArr.length === 0 &&
+                            <View style={{ flexDirection: 'row', width: 60, alignItems: "center" }}>
+                                <TouchableOpacity onPress={() => this.addMyStory()}>
+                                    <View style={{ width: 55, height: 55 }}>
+                                        <Image style={{ width: 56, height: 56, borderWidth: 2, borderColor: "#0084FF", borderRadius: 28 }} source={require('../dummy.jpg')} />
+                                        <Text style={{ textAlign: "center", fontWeight: "bold" }}>
+                                            Add story
+                        </Text>
+                                    </View>
+                                </TouchableOpacity>
+                            </View>
+                        }
+                        {this.state.storyArr.map((e) => {
+                            if (e.uid !== this.state.uid) {
+                                return <View style={{  flexDirection: 'row', width: 60, alignItems: "center" }}>
+                                    <TouchableOpacity onPress={() => this.addMyStory()}>
+                                        <View style={{ width: 55, height: 55 }}>
+                                            <Image style={{ width: 56, height: 56, borderWidth: 2, borderColor: "#0084FF", borderRadius: 28 }} source={require('../dummy.jpg')} />
+                                            <Text style={{ textAlign: "center", fontWeight: "bold" }}>
+                                                Add story
+                                    </Text>
+                                        </View>
+                                    </TouchableOpacity>
+                                </View>
+                            }
+                            else {
+                                this.state.storyArr.map((e) => {
+                                    if (e.uid !== this.state.uid) {
+                                        return <View style={{  flexDirection: 'row', width: 60, alignItems: "center" }}>
+                                            <View style={{ width: 55, height: 55 }}>
+                                                <Image style={{ width: 56, height: 56, borderWidth: 2, borderColor: "#0084FF", borderRadius: 28 }} source={{ uri: e.story }} />
+                                                <Text style={{ textAlign: "center", fontWeight: "bold" }}>
+                                                    {e.username}
+                                                </Text>
+                                            </View>
+                                            }
+                                    </View>
+                                    }
+                                })
+                            }
+                        })}
+                        {this.state.storyArr && this.state.storyArr.map((e) => {
+                            return <View style={{ flexDirection: 'row', width: 60, alignItems: "center" }}>
                                 <View style={{ width: 55, height: 55 }}>
-                                    <Image style={{ width: 56, height: 56, borderWidth: 2, borderColor: "#0084FF", borderRadius: 28 }} source={require('../dummy.jpg')} />
+                                    <Image style={{ width: 56, height: 56, borderWidth: 2, borderColor: "#0084FF", borderRadius: 28 }} source={{ uri: e.story }} />
                                     <Text style={{ textAlign: "center", fontWeight: "bold" }}>
-                                        {e.key}
+                                        {e.username}
                                     </Text>
                                 </View>
                             </View>
@@ -73,7 +160,12 @@ class App extends React.Component {
                         {this.state.con && this.state.users.map((e) => {
                             return <TouchableOpacity onPress={() => this.startChat(e._id)}>
                                 <View style={{ flex: 1, flexDirection: 'row', width: "100%", height: 60 }}>
-                                    <Image style={{ width: 56, height: 56, borderWidth: 2, borderColor: "#0084FF", borderRadius: 28 }} source={require('../dummy.jpg')} />
+                                    {e.data.photo
+                                        ?
+                                        <Image style={{ width: 56, height: 56, borderWidth: 2, borderColor: "#0084FF", borderRadius: 28 }} source={{ uri: e.data.photo }} />
+                                        :
+                                        <Image style={{ width: 56, height: 56, borderWidth: 2, borderColor: "#0084FF", borderRadius: 28 }} source={require('../dummy.jpg')} />
+                                    }
                                     <Text style={{ textAlignVertical: "center", marginLeft: 10, fontWeight: "bold" }}>{e.data.username}</Text>
                                 </View>
                             </TouchableOpacity>
@@ -95,7 +187,7 @@ const styles = StyleSheet.create({
         borderBottomWidth: 1,
         borderTopColor: "lightgrey",
         borderBottomColor: "lightgrey",
-        paddingBottom: 25,
+        paddingBottom: 46,
         marginBottom: 22
     },
     container1: {
@@ -113,7 +205,6 @@ const styles = StyleSheet.create({
     }
 });
 
-
-        //key store is the secret key 
-        // production apk banne ko bolte hen. sign and unsign
+//key store is the secret key 
+// production apk banne ko bolte hen. sign and unsign
 // key store ko use krte hue jo banaoge use signed apk kete hen

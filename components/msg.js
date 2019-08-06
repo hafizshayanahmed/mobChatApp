@@ -1,9 +1,11 @@
 import React from 'react';
-import { StyleSheet, Text, View, ScrollView, TextInput, Button, KeyboardAvoidingView } from 'react-native';
-import { sendMessageToDb } from "../config/firebase"
+import { StyleSheet, Text, View, ScrollView, TextInput, TouchableOpacity, KeyboardAvoidingView, Image } from 'react-native';
+import { sendMessageToDb, getMyUid } from "../config/firebase"
 import { firebase } from "../config/firebase"
 import "firebase/firestore"
-import EmojiInput from "react-native-emoji-input"
+import EmojiSelector, { Categories } from 'react-native-emoji-selector';
+import * as ImagePicker from 'expo-image-picker';
+import moment from 'moment';
 
 const db = firebase.firestore();
 
@@ -12,12 +14,23 @@ class Msg extends React.Component {
         super();
         this.state = {
             text: "",
-            con: false
+            con: false,
+            image: null,
+            emojiCon: false,
+            bar: true
         }
     }
 
     componentDidMount() {
         this.getMessages()
+        this.getUid()
+    }
+
+    async getUid() {
+        const uid = await getMyUid()
+        this.setState({
+            uid: uid.uid
+        })
     }
 
     async sendMessage() {
@@ -42,43 +55,103 @@ class Msg extends React.Component {
             })
     }
 
+    async pickImage() {
+        let result = await ImagePicker.launchImageLibraryAsync({
+            mediaTypes: ImagePicker.MediaTypeOptions.All,
+            allowsEditing: true,
+            aspect: [4, 3],
+        });
+
+        if (!result.cancelled) {
+            this.setState({ image: result.uri });
+        }
+    };
+
     render() {
-        console.log(this.messageList)
         return (
             <View style={styles.container}>
                 <ScrollView>
-                    <View ref={(el) => { this.messageList = el }}>
+                    <View>
                         {this.state.con && this.state.msg.map((e) => {
-                            return <View style={e.user === 1
+                            return <View style={e.data.userId === this.state.uid
                                 ?
-                                { display: "flex", flexDirection: "column", alignItems: "flex-start" }
-                                :
                                 { display: "flex", flexDirection: "column", alignItems: "flex-end" }
+                                :
+                                { display: "flex", flexDirection: "column", alignItems: "flex-start" }
                             }>
-                                <Text style={e.user === 1 ? { textAlign: "right", height: 20, backgroundColor: "#0084FF", } : { textAlign: "left", height: 20, backgroundColor: "lightgrey" }}>
+                                <Text style={e.data.userId === this.state.uid ? { borderRadius: 5, textAlign: "right", height: 20, backgroundColor: "#0084FF", color: "white" } : { borderRadius: 5, textAlign: "left", height: 20, backgroundColor: "lightgrey" }}>
                                     {e.data.message}
+                                </Text>
+                                <Text>
+                                    {moment(e.data.timestamp).fromNow()}
                                 </Text>
                             </View>
                         })}
                     </View>
                 </ScrollView>
                 <KeyboardAvoidingView
-                    keyboardVerticalOffset={95}
+                    keyboardVerticalOffset={93}
                     behavior="padding" >
+                    {this.state.image &&
+                        <Image source={{ uri: this.state.image }} style={{ width: 200, height: 200 }} />}
+                    {this.state.bar &&
+                        <View style={{ flexDirection: "row", marginBottom: 5 }}>
+                            <TouchableOpacity
+                                onPress={() => { this.pickImage(), this.setState({ emojiCon: false }) }}
+                                style={{
+                                    width: "20%",
+                                    height: 30,
+                                    backgroundColor: "#841584",
+                                    alignItems: "center",
+                                    justifyContent: "center",
+                                    borderRadius: 5,
+                                }}
+                            >
+                                <Text style={{ color: "white" }}>Image</Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity
+                                onPress={() => this.setState({ emojiCon: true, bar: false })}
+                                style={{
+                                    width: "20%",
+                                    height: 30,
+                                    backgroundColor: "#841584",
+                                    alignItems: "center",
+                                    justifyContent: "center",
+                                    borderRadius: 5,
+                                }}
+                            >
+                                <Text style={{ color: "white" }}>Emoji</Text>
+                            </TouchableOpacity>
+                        </View>
+                    }
                     <View style={{ width: "100%" }}>
-                        <EmojiInput
-                            onEmojiSelected={(emoji) => { console.log(emoji) }}
+                        {this.state.emojiCon && <EmojiSelector
+                            style={{ width: "100%", height: "93.6%", paddingBottom: 10, paddingTop: 10 }}
+                            onEmojiSelected={emoji => this.setState({
+                                text: emoji
+                            })}
                         />
-                        <TextInput style={{ height: 30, borderColor: "grey", borderWidth: 1 }} value={this.state.text} onChangeText={(e) => this.setState({ text: e })} />
-                        <Button
-                            onPress={() => { this.sendMessage() }}
-                            title="Send"
-                            color="#841584"
+                        }
+                    </View>
+                    <View style={{ flexDirection: "row" }}>
+                        <TextInput onFocus={() => this.setState({ emojiCon: false, bar: true })} style={{ height: 35, borderColor: "lightgrey", borderWidth: 1, borderRadius: 5, width: "80%" }} value={this.state.text} onChangeText={(e) => this.setState({ text: e })} />
+                        <TouchableOpacity
+                            onPress={() => this.sendMessage()}
                             accessibilityLabel="Learn more about this purple button"
-                        />
+                            style={{
+                                alignItems: "center",
+                                justifyContent: "center",
+                                backgroundColor: "#841584",
+                                width: "20%",
+                                height: 35,
+                                borderRadius: 5,
+                            }}
+                        >
+                            <Text style={{ color: "white" }}>Send</Text>
+                        </TouchableOpacity>
                     </View>
                 </KeyboardAvoidingView>
-            </View>
+            </View >
         );
     }
 }

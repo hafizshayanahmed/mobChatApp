@@ -8,14 +8,20 @@
     "eject": "expo eject"
   },
   "dependencies": {
+    "emoji-picker-react": "^2.1.1",
     "expo": "^33.0.0",
+    "expo-av": "^5.0.2",
     "expo-facebook": "^6.0.0",
+    "expo-image-picker": "^5.0.2",
     "firebase": "^6.3.3",
+    "moment": "^2.24.0",
     "react": "16.8.3",
     "react-dom": "^16.8.6",
     "react-native": "https://github.com/expo/react-native/archive/sdk-33.0.0.tar.gz",
     "react-native-emoji-input": "^1.1.9",
     "react-native-emoji-selector": "^0.1.7",
+    "react-native-emoticons": "^1.0.13",
+    "react-native-smart-emoji-picker": "^0.1.2",
     "react-native-web": "^0.11.4",
     "react-navigation": "^3.11.1"
   },

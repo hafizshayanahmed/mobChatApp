@@ -8,7 +8,18 @@ const TabNavigator = createBottomTabNavigator({
     Requests: {
         screen: Routes.Requests
     }
-})
+},
+    {
+        tabBarOptions: {
+            style: {
+                paddingBottom: 8,
+            },
+            labelStyle: {
+                fontSize: 20,
+              },
+        },
+    }
+)
 
 const switchNavigator = createSwitchNavigator({
     Login: {
@@ -21,7 +32,10 @@ const switchNavigator = createSwitchNavigator({
 
 const MainNavigator = createStackNavigator({
     Login: {
-        screen: switchNavigator
+        screen: switchNavigator,
+        navigationOptions: {
+            header: null,
+        },
     },
     Tab: {
         screen: TabNavigator,
@@ -36,7 +50,7 @@ const MainNavigator = createStackNavigator({
                 marginTop: 25
             },
             title: "Messanger",
-
+            headerLeft: null
         },
     },
     Msg: {

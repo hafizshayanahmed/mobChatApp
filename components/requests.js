@@ -11,7 +11,7 @@ class Msg extends React.Component {
   render() {
     return (
       <View style={styles.container}>
-
+        <Text>In progress</Text>
       </View>
     );
   }
@@ -21,6 +21,8 @@ export default Msg
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center"
   }
 });
