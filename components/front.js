@@ -11,6 +11,7 @@ class App extends React.Component {
             storyArr: [],
             con: false,
             storyCon: false,
+            flag: 0,
         }
     }
 
@@ -22,9 +23,10 @@ class App extends React.Component {
     }
 
     async getUid() {
-        const uid = await getMyUid()
+        const uid = await getMyUid()        
         this.setState({
-            uid: uid.uid
+            uid: uid.uid,
+            name: uid.username
         })
     }
 
@@ -70,7 +72,7 @@ class App extends React.Component {
         if (!result.cancelled) {
             this.setState({ image: result.uri });
             try {
-                let resp = await addStory(result.uri)
+                let resp = await addStory(result.uri, this.state.name)
                 alert(resp.message)
                 this.getAllStory()
             } catch (e) {
@@ -78,6 +80,10 @@ class App extends React.Component {
             }
         }
     };
+
+    changeFlag() {
+        this.setState({ flag: this.state.flag + 1 });
+    }
 
     render() {
         return (
@@ -87,7 +93,7 @@ class App extends React.Component {
                         Stories
         </Text>
                     <View style={styles.container}>
-                    {this.state.storyArr.length === 0 &&
+                        {this.state.storyArr.length === 0 &&
                             <View style={{ flexDirection: 'row', width: 60, alignItems: "center" }}>
                                 <TouchableOpacity onPress={() => this.addMyStory()}>
                                     <View style={{ width: 55, height: 55 }}>
@@ -100,8 +106,21 @@ class App extends React.Component {
                             </View>
                         }
                         {this.state.storyArr.map((e) => {
-                            if (e.uid !== this.state.uid) {
-                                return <View style={{  flexDirection: 'row', width: 60, alignItems: "center" }}>
+                            if (e.uid === this.state.uid && this.state.flag === 0) {
+                                this.changeFlag()
+                            }
+                            if (e.uid.indexOf(this.state.uid) !== -1) {
+                                return <View style={{ flexDirection: 'row', width: 60, alignItems: "center" }}>
+                                    <View style={{ width: 55, height: 55 }}>
+                                        <Image style={{ width: 56, height: 56, borderWidth: 2, borderColor: "#0084FF", borderRadius: 28 }} source={{ uri: e.story }} />
+                                        <Text style={{ textAlign: "center", fontWeight: "bold" }}>
+                                            {e.username}
+                                        </Text>
+                                    </View>
+                                </View>
+                            }
+                            {
+                                this.state.flag > 0 && <View style={{ flexDirection: 'row', width: 60, alignItems: "center" }}>
                                     <TouchableOpacity onPress={() => this.addMyStory()}>
                                         <View style={{ width: 55, height: 55 }}>
                                             <Image style={{ width: 56, height: 56, borderWidth: 2, borderColor: "#0084FF", borderRadius: 28 }} source={require('../dummy.jpg')} />
@@ -112,31 +131,18 @@ class App extends React.Component {
                                     </TouchableOpacity>
                                 </View>
                             }
-                            else {
-                                this.state.storyArr.map((e) => {
-                                    if (e.uid !== this.state.uid) {
-                                        return <View style={{  flexDirection: 'row', width: 60, alignItems: "center" }}>
-                                            <View style={{ width: 55, height: 55 }}>
-                                                <Image style={{ width: 56, height: 56, borderWidth: 2, borderColor: "#0084FF", borderRadius: 28 }} source={{ uri: e.story }} />
-                                                <Text style={{ textAlign: "center", fontWeight: "bold" }}>
-                                                    {e.username}
-                                                </Text>
-                                            </View>
-                                            }
-                                    </View>
-                                    }
-                                })
-                            }
                         })}
                         {this.state.storyArr && this.state.storyArr.map((e) => {
-                            return <View style={{ flexDirection: 'row', width: 60, alignItems: "center" }}>
-                                <View style={{ width: 55, height: 55 }}>
-                                    <Image style={{ width: 56, height: 56, borderWidth: 2, borderColor: "#0084FF", borderRadius: 28 }} source={{ uri: e.story }} />
-                                    <Text style={{ textAlign: "center", fontWeight: "bold" }}>
-                                        {e.username}
-                                    </Text>
+                            if (e.uid !== this.state.uid) {
+                                return <View style={{ flexDirection: 'row', width: 60, alignItems: "center" }}>
+                                    <View style={{ width: 55, height: 55 }}>
+                                        <Image style={{ width: 56, height: 56, borderWidth: 2, borderColor: "#0084FF", borderRadius: 28 }} source={{ uri: e.story }} />
+                                        <Text style={{ textAlign: "center" }}>
+                                            {e.username}
+                                        </Text>
+                                    </View>
                                 </View>
-                            </View>
+                            }
                         })}
                     </View>
                     <Text style={{ fontWeight: "bold" }}>

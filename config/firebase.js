@@ -98,10 +98,10 @@ function getStory() {
     })
 }
 
-function addStory(e) {
+function addStory(e, name) {
     let currentUser = firebase.auth().currentUser;
     return new Promise((resolve, reject) => {
-        db.collection("story").doc(currentUser.uid).set({ story: e, createdAt: Date.now(), uid: currentUser.uid, username: currentUser.displayName }).then(() => {
+        db.collection("story").doc(currentUser.uid).set({ story: e, createdAt: Date.now(), uid: currentUser.uid, username: name }).then(() => {
             resolve({ message: "Story added" })
         })
             .catch((e) => {
@@ -130,7 +130,7 @@ function createRoom(friendId) {
                         }
                     }
                     db.collection('chatrooms').add(obj).then(snapshot => {
-                        resolve({ data: obj, _id: snapshot.id })
+                        resolve({ data: obj, _id: snapshot.id }) 
                     })
                 } else {
                     resolve(chatExists);
@@ -142,7 +142,12 @@ function createRoom(friendId) {
 function getMyUid() {
     let currentUser = firebase.auth().currentUser
     return new Promise((resolve, reject) => {
-        resolve(currentUser)
+        db.collection("users").doc(currentUser.uid).get().then((e) => {
+            resolve(e.data())
+        })
+            .catch((e) => {
+                reject(e)
+            })
     })
 }
 
