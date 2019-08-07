@@ -27,6 +27,9 @@ const switchNavigator = createSwitchNavigator({
     },
     Register: {
         screen: Routes.Register
+    },
+    Status: {
+        screen: Routes.Status
     }
 })
 

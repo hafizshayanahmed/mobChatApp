@@ -23,7 +23,7 @@ class App extends React.Component {
     }
 
     async getUid() {
-        const uid = await getMyUid()        
+        const uid = await getMyUid()
         this.setState({
             uid: uid.uid,
             name: uid.username
@@ -85,6 +85,10 @@ class App extends React.Component {
         this.setState({ flag: this.state.flag + 1 });
     }
 
+    showStatus(e){
+        this.props.navigation.navigate("Status", e)
+    }
+
     render() {
         return (
             <View style={{ flex: 1, marginTop: 5, padding: 5 }}>
@@ -111,12 +115,14 @@ class App extends React.Component {
                             }
                             if (e.uid.indexOf(this.state.uid) !== -1) {
                                 return <View style={{ flexDirection: 'row', width: 60, alignItems: "center" }}>
-                                    <View style={{ width: 55, height: 55 }}>
-                                        <Image style={{ width: 56, height: 56, borderWidth: 2, borderColor: "#0084FF", borderRadius: 28 }} source={{ uri: e.story }} />
-                                        <Text style={{ textAlign: "center", fontWeight: "bold" }}>
-                                            {e.username}
-                                        </Text>
-                                    </View>
+                                    <TouchableOpacity onPress={() => this.showStatus(e)}>
+                                        <View style={{ width: 55, height: 55 }}>
+                                            <Image style={{ width: 56, height: 56, borderWidth: 2, borderColor: "#0084FF", borderRadius: 28 }} source={{ uri: e.story }} />
+                                            <Text style={{ textAlign: "center", fontWeight: "bold" }}>
+                                                {e.username}
+                                            </Text>
+                                        </View>
+                                    </TouchableOpacity>
                                 </View>
                             }
                             {
@@ -135,12 +141,14 @@ class App extends React.Component {
                         {this.state.storyArr && this.state.storyArr.map((e) => {
                             if (e.uid !== this.state.uid) {
                                 return <View style={{ flexDirection: 'row', width: 60, alignItems: "center" }}>
-                                    <View style={{ width: 55, height: 55 }}>
-                                        <Image style={{ width: 56, height: 56, borderWidth: 2, borderColor: "#0084FF", borderRadius: 28 }} source={{ uri: e.story }} />
-                                        <Text style={{ textAlign: "center" }}>
-                                            {e.username}
-                                        </Text>
-                                    </View>
+                                    <TouchableOpacity onPress={()=> this.showStatus(e)}>
+                                        <View style={{ width: 55, height: 55 }}>
+                                            <Image style={{ width: 56, height: 56, borderWidth: 2, borderColor: "#0084FF", borderRadius: 28 }} source={{ uri: e.story }} />
+                                            <Text style={{ textAlign: "center" }}>
+                                                {e.username}
+                                            </Text>
+                                        </View>
+                                    </TouchableOpacity>
                                 </View>
                             }
                         })}
