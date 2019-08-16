@@ -85,7 +85,7 @@ class App extends React.Component {
         this.setState({ flag: this.state.flag + 1 });
     }
 
-    showStatus(e){
+    showStatus(e) {
         this.props.navigation.navigate("Status", e)
     }
 
@@ -141,7 +141,7 @@ class App extends React.Component {
                         {this.state.storyArr && this.state.storyArr.map((e) => {
                             if (e.uid !== this.state.uid) {
                                 return <View style={{ flexDirection: 'row', width: 60, alignItems: "center" }}>
-                                    <TouchableOpacity onPress={()=> this.showStatus(e)}>
+                                    <TouchableOpacity onPress={() => this.showStatus(e)}>
                                         <View style={{ width: 55, height: 55 }}>
                                             <Image style={{ width: 56, height: 56, borderWidth: 2, borderColor: "#0084FF", borderRadius: 28 }} source={{ uri: e.story }} />
                                             <Text style={{ textAlign: "center" }}>
@@ -172,7 +172,7 @@ class App extends React.Component {
         </Text>
                     <View style={styles.container2}>
                         {this.state.con && this.state.users.map((e) => {
-                            return <TouchableOpacity onPress={() => this.startChat(e._id)}>
+                            return this.state.uid !== e.data.uid && <TouchableOpacity onPress={() => this.startChat(e._id)}>
                                 <View style={{ flex: 1, flexDirection: 'row', width: "100%", height: 60 }}>
                                     {e.data.photo
                                         ?

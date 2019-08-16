@@ -160,6 +160,17 @@ function sendMessageToDb(message, roomId) {
     db.collection("chatrooms").doc(roomId).collection("messages").add(obj);
 }
 
+function deleteStoryFromDatabase(){
+    return new Promise((resolve, reject) => {
+        db.collection("story").doc(firebase.auth().currentUser.uid).delete().then((e) => {
+            resolve({ message: "Story has been deleted" })
+        })
+            .catch((e) => {
+                reject(e)
+            })
+    })
+}
+
 export {
     firebase,
     login,
@@ -171,4 +182,5 @@ export {
     getStory,
     addStory,
     getMyUid,
+    deleteStoryFromDatabase,
 }

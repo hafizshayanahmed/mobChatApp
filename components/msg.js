@@ -6,6 +6,7 @@ import "firebase/firestore"
 import EmojiSelector, { Categories } from 'react-native-emoji-selector';
 import * as ImagePicker from 'expo-image-picker';
 import moment from 'moment';
+import { Audio } from 'expo-av';
 
 const db = firebase.firestore();
 
@@ -38,6 +39,11 @@ class Msg extends React.Component {
         this.setState({ text: "" })
     }
 
+    async sendEmoji() {
+        await sendMessageToDb(this.state.emoji, this.props.navigation.state.params)
+        this.setState({ text: "" })
+    }
+
     getMessages() {
         const roomId = this.props.navigation.state.params
         var messages = []
@@ -67,6 +73,17 @@ class Msg extends React.Component {
         }
     };
 
+    async recording() {
+        const recording = new Audio.Recording();
+        try {
+            await recording.prepareToRecordAsync(Audio.RECORDING_OPTIONS_PRESET_HIGH_QUALITY);
+            await recording.startAsync();
+            // You are now recording!
+        } catch (error) {
+            // An error occurred!
+        }
+    }
+
     render() {
         return (
             <View style={styles.container}>
@@ -79,9 +96,9 @@ class Msg extends React.Component {
                                 :
                                 { display: "flex", flexDirection: "column", alignItems: "flex-start" }
                             }>
-                                <Text style={e.data.userId === this.state.uid ? { borderRadius: 5, textAlign: "right", height: 20, backgroundColor: "#0084FF", color: "white" } : { borderRadius: 5, textAlign: "left", height: 20, backgroundColor: "lightgrey" }}>
-                                    {e.data.message}
-                                </Text>
+                                <View style={e.data.userId === this.state.uid ? { borderRadius: 20, textAlign: "right", backgroundColor: "#0084FF" } : { borderRadius: 20, textAlign: "left", backgroundColor: "lightgrey" }}>
+                                    <Text style={e.data.userId === this.state.uid ? { padding: 10, color: "white", fontSize: 16 } : { padding: 8, fontSize: 16 }}>{e.data.message}</Text>
+                                </View>
                                 <Text>
                                     {moment(e.data.timestamp).fromNow()}
                                 </Text>
@@ -93,7 +110,7 @@ class Msg extends React.Component {
                     keyboardVerticalOffset={93}
                     behavior="padding" >
                     {this.state.image &&
-                        <Image source={{ uri: this.state.image }} style={{ width: 200, height: 200 }} />}
+                        <Image source={{ uri: this.state.image }} style={{width: "100%", height: 200, alignSelf: "center", alignItems: "center" }} />}
                     {this.state.bar &&
                         <View style={{ flexDirection: "row", marginBottom: 5 }}>
                             <TouchableOpacity
@@ -122,13 +139,30 @@ class Msg extends React.Component {
                             >
                                 <Text style={{ color: "white" }}>Emoji</Text>
                             </TouchableOpacity>
+                            <TouchableOpacity
+                                onPress={() => this.recording()}
+                                style={{
+                                    width: "20%",
+                                    height: 30,
+                                    backgroundColor: "#841584",
+                                    alignItems: "center",
+                                    justifyContent: "center",
+                                    borderRadius: 5,
+                                }}
+                            >
+                                <Text style={{ color: "white" }}>Audio</Text>
+                            </TouchableOpacity>
                         </View>
                     }
                     <View style={{ width: "100%" }}>
                         {this.state.emojiCon && <EmojiSelector
                             style={{ width: "100%", height: "93.6%", paddingBottom: 10, paddingTop: 10 }}
                             onEmojiSelected={emoji => this.setState({
-                                text: emoji
+                                emoji: emoji,
+                                emojiCon: false,
+                                bar: true
+                            }, () => {
+                                this.sendEmoji()
                             })}
                         />
                         }

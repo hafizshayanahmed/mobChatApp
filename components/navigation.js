@@ -12,7 +12,7 @@ const TabNavigator = createBottomTabNavigator({
     {
         tabBarOptions: {
             style: {
-                paddingBottom: 8,
+                paddingBottom: 11,
             },
             labelStyle: {
                 fontSize: 20,
@@ -45,7 +45,7 @@ const MainNavigator = createStackNavigator({
         navigationOptions: {
             headerTitleStyle: {
                 color: "white",
-                paddingBottom: 23,
+                paddingBottom: 24,
             },
             headerStyle: {
                 backgroundColor: "#0084FF",

@@ -11,8 +11,9 @@ class App extends React.Component {
   }
 
   render() {
+    console.disableYellowBox = true;
     return (
-      <View style={{ flex: 1 ,padding: 5, paddingtop: 0 }}>
+      <View style={{ flex: 1, padding: 5, paddingtop: 0 }}>
         <Navigation />
       </View>
     );
